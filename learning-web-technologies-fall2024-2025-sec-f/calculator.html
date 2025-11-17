@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator (No Regex)</title>
+
+    <style>
+        body {
+            background: #515254;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .calc {
+            width: 400px;
+            background: #222326;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .display {
+            background: #0d1b2a;
+            padding: 15px;
+            text-align: right;
+            font-size: 32px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            min-height: 50px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            background: #415a77;
+            border: none;
+            padding: 15px;
+            font-size: 20px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #778da9;
+        }
+
+        .op {
+            background: #cdf11a;
+        }
+
+        .equals {
+            grid-column: span 2;
+            background: #2a9d8f;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="calc">
+        <div id="display" class="display">0</div>
+
+        <div class="grid">
+            <button onclick="clearDisplay()">C</button>
+            <button onclick="backspace()">←</button>
+            <button onclick="percent()">%</button>
+            <button class="op" onclick="operator('/')">÷</button>
+
+            <button onclick="digit('7')">7</button>
+            <button onclick="digit('8')">8</button>
+            <button onclick="digit('9')">9</button>
+            <button class="op" onclick="operator('*')">×</button>
+
+            <button onclick="digit('4')">4</button>
+            <button onclick="digit('5')">5</button>
+            <button onclick="digit('6')">6</button>
+            <button class="op" onclick="operator('-')">-</button>
+
+            <button onclick="digit('1')">1</button>
+            <button onclick="digit('2')">2</button>
+            <button onclick="digit('3')">3</button>
+            <button class="op" onclick="operator('+')">+</button>
+
+            <button onclick="digit('0')">0</button>
+            <button onclick="decimal()">.</button>
+            <button class="equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById("display");
+        let current = "0";
+        let expression = "";
+        let lastWasEqual = false;
+
+        function updateDisplay() {
+            display.innerText = current;
+        }
+
+        function digit(n) {
+            if (lastWasEqual) {
+                current = n;
+                expression = "";
+                lastWasEqual = false;
+                updateDisplay();
+                return;
+            }
+
+            if (current === "0") current = n;
+            else current += n;
+
+            updateDisplay();
+        }
+
+        function decimal() {
+            if (lastWasEqual) {
+                current = "0.";
+                expression = "";
+                lastWasEqual = false;
+                updateDisplay();
+                return;
+            }
+
+            if (!current.includes(".")) {
+                current += ".";
+                updateDisplay();
+            }
+        }
+
+        function operator(op) {
+            if (lastWasEqual) {
+                expression = current;
+                lastWasEqual = false;
+            }
+
+            // If last char in expression is operator → replace it
+            if (expression !== "" && isLastCharOperator(expression)) {
+                expression = expression.slice(0, -1) + op;
+            } else {
+                expression += current + op;
+            }
+
+            current = "0";
+            updateDisplay();
+        }
+
+        function isLastCharOperator(str) {
+            const last = str[str.length - 1];
+            return last === "+" || last === "-" || last === "*" || last === "/";
+        }
+
+        function clearDisplay() {
+            current = "0";
+            expression = "";
+            lastWasEqual = false;
+            updateDisplay();
+        }
+
+        function backspace() {
+            if (current.length <= 1) current = "0";
+            else current = current.slice(0, current.length - 1);
+            updateDisplay();
+        }
+
+        function percent() {
+            let num = Number(current);
+            current = String(num / 100);
+            updateDisplay();
+        }
+
+        function calculate() {
+            let full = expression + current;
+
+            for (let i = 0; i < full.length; i++) {
+                let c = full[i];
+                if (
+                    !(c >= "0" && c <= "9") &&
+                    c !== "+" &&
+                    c !== "-" &&
+                    c !== "*" &&
+                    c !== "/" &&
+                    c !== "."
+                ) {
+                    current = "Error";
+                    expression = "";
+                    updateDisplay();
+                    return;
+                }
+            }
+
+            try {
+                let result = Function("return " + full)();
+                current = String(result);
+            } catch {
+                current = "Error";
+            }
+
+            expression = "";
+            lastWasEqual = true;
+            updateDisplay();
+        }
+    </script>
+
+</body>
+
+</html>
