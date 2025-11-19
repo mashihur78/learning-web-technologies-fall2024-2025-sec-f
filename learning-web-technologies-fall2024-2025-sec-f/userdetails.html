@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Form Builder</title>
+</head>
+<body>
+
+<h3>Create Input</h3>
+
+<label>Enter Label Text:</label><br>
+<input type="text" id="labelText"><br><br>
+
+<label>Select Input Type:</label><br>
+<select id="inputType">
+    <option value="">--Select--</option>
+    <option value="text">Text</option>
+    <option value="email">Email</option>
+    <option value="number">Number</option>
+    <option value="password">Password</option>
+    <option value="date">Date</option>
+    <option value="textarea">Textarea</option>
+</select><br><br>
+
+<button onclick="addField()">Add</button>
+
+<h3>Generated Form:</h3>
+<div id="formArea"></div>
+
+<br>
+<button onclick="saveData()">Save</button>
+
+<p id="error" style="color:red; display:none;">Please enter label and select input type!</p>
+
+<h3>Saved Data:</h3>
+<div id="resultArea"></div>
+
+
+<script>
+
+let fields = [];
+let idCount = 0;
+
+function addField() {
+    let label = document.getElementById("labelText").value;
+    let type = document.getElementById("inputType").value;
+    let error = document.getElementById("error");
+
+    if (label === "" || type === "") {
+        error.style.display = "block";
+        return;
+    } else {
+        error.style.display = "none";
+    }
+
+    idCount++;
+    let fieldId = "field_" + idCount;
+
+    fields.push({ label: label, type: type, id: fieldId });
+
+    let formArea = document.getElementById("formArea");
+
+    let container = document.createElement("div");
+
+    let labelTag = document.createElement("label");
+    labelTag.textContent = label + ": ";
+
+    let input;
+
+    if (type === "textarea") {
+        input = document.createElement("textarea");
+    } else {
+        input = document.createElement("input");
+        input.type = type;
+    }
+
+    input.id = fieldId;
+
+    container.appendChild(labelTag);
+    container.appendChild(input);
+
+    formArea.appendChild(container);
+
+    document.getElementById("labelText").value = "";
+    document.getElementById("inputType").value = "";
+}
+
+
+function saveData() {
+    let resultArea = document.getElementById("resultArea");
+    resultArea.innerHTML = "";
+
+    if (fields.length === 0) {
+        document.getElementById("error").style.display = "block";
+        return;
+    }
+
+    fields.forEach(function(f) {
+        let p = document.createElement("p");
+
+        let value = document.getElementById(f.id).value;
+
+        p.textContent = f.label + ": " + value;
+
+        resultArea.appendChild(p);
+    });
+}
+
+</script>
+
+</body>
+</html>
